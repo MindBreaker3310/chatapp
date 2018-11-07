@@ -14,11 +14,24 @@ app.use(express.static(publicPath));
 
 io.on('connection',(socket)=>{
   console.log('new user connected');
-})
 
-io.on('disconnect',()=>{
-  console.log('user was disconnected');
+  socket.emit('newMessage',{
+    from:'GM',
+    text:'this is server specking'
+  });
+
+  socket.on('createMessage',(message)=>{
+    console.log(message);
+  });
+
+  socket.on('disconnect',()=>{
+    console.log('user was disconnected');
+  });
+
 });
+
+
+
 
 server.listen(port, () => {
   console.log(`Server is up on ${port}`);
