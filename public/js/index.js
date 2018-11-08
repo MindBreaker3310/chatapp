@@ -2,8 +2,7 @@ var socket= io();
 
 socket.on('connect',()=>{
   console.log('connect to server');
-
-
+  
   socket.emit('createMessage',{
     from:'max',
     text:'connected',
