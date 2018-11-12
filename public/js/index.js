@@ -3,25 +3,12 @@ var socket= io();
 socket.on('connect',()=>{
   console.log('connect to server');
 });
-//接收伺服器訊息
-socket.on('newMessage',(message)=>{
-  console.log('newMessage',message);
-  //放到list裡
-  var li=jQuery('<li></li>');
-  li.text(`${message.createdAt} -> ${message.from}:${message.text}`);
-  jQuery('#messages').append(li);
-});
+
 //伺服器關閉
 socket.on('disconnect',()=>{
   console.log('disconnect');
 });
-//傳送訊息至伺服器
-// socket.emit('createMessage',{
-//   from:'client',
-//   text:'say hi',
-// },(serverMessage)=>{
-//   console.log('callback got it',serverMessage);
-// });
+
 
 //傳送訊息
 var input_box=jQuery('[name=message-input]');
@@ -58,15 +45,53 @@ locationButton.on('click', () => {
     });
 });
 
+function scrollToBottom(){
+  var messages_list=jQuery('#messages-list');
+  var lastMessage=messages_list.children('li:last-child');
+
+  var clientHeight = messages_list.prop('clientHeight');
+  var scrollTop = messages_list.prop('scrollTop');
+  var scrollHeight = messages_list.prop('scrollHeight');//整個list高度
+  var lastMessageHeight=lastMessage.innerHeight();//最後一個的高度
+  var secondLastMessageHeight=lastMessage.prev().innerHeight();//倒數第二個的高度
+
+  if(clientHeight+scrollTop+lastMessageHeight+secondLastMessageHeight>=scrollHeight){
+    messages_list.scrollTop(scrollHeight);//滑到最下面
+  }
+
+}
+
+//接收伺服器訊息
+socket.on('newMessage',(message)=>{
+  var template=jQuery('#message-template').html();
+  var html=Mustache.render(template,{
+    from:message.from,
+    text:message.text,
+    createdAt:message.createdAt
+  });
+  jQuery('#messages-list').append(html);
+  scrollToBottom()
+});
+
+
 //接收location
 socket.on('newLocationMessage',(message)=>{
-  console.log('newLocationMessage',message);
-  //放到list裡
-  var li=jQuery('<li></li>');
-  var a=jQuery('<a target="_blank">my location</a>')
+  var template=jQuery('#location-template').html();
+  var html=Mustache.render(template,{
+    from:message.from,
+    createdAt:message.createdAt,
+    url:message.url
+  });
 
-  li.text(`${message.createdAt} -> ${message.from}:`);
-  a.attr('href',message.url);
-  li.append(a);
-  jQuery('#messages').append(li);
+  jQuery('#messages-list').append(html);
+  // console.log('newLocationMessage',message);
+  // //放到list裡
+  // var li=jQuery('<li></li>');
+  // var a=jQuery('<a target="_blank">my location</a>')
+
+  // li.text(`${message.createdAt} -> ${message.from}:`);
+  // a.attr('href',message.url);
+  // li.append(a);
+  // jQuery('#messages').append(li);
+  scrollToBottom()
 });
