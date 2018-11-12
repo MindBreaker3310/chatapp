@@ -24,13 +24,15 @@ socket.on('disconnect',()=>{
 // });
 
 //傳送訊息
+var input_box=jQuery('[name=message-input]');
+
 jQuery('#message-form').on('submit',(e)=>{
   e.preventDefault();//避免使用預設 改寫submit方法
   socket.emit('createMessage',{
     from:'user',
-    text:jQuery('[name=message-input]').val()
+    text:input_box.val()
   },(callback)=>{
-    console.log('callback done');
+    input_box.val('');//成功後清空輸入框
   });
 });
 
@@ -40,13 +42,18 @@ locationButton.on('click', () => {
   if (!navigator.geolocation) {
     return alert('Geo location not supported by your browser');
   }
+
+  locationButton.attr('disabled','disabled').text('Sending...');
+
   navigator.geolocation.getCurrentPosition((position) => {
+    locationButton.removeAttr('disabled').text('location');
     console.log(position);
     socket.emit('createLocationMessage',{
       from:'user',
       text:{lat:position.coords.latitude,lon:position.coords.longitude}
     });
-    }, (err) => {
+    }, () => {
+      locationButton.removeAttr('disabled').text('location');
       alert('Unable to fetch location');
     });
 });
