@@ -4,7 +4,7 @@ const socketIO=require('socket.io');
 const http=require('http');
 
 const {msg,locationMsg}=require('./message');
-
+const {isRealString}=require('./validation');
 const publicPath = path.join(__dirname, '../public');
 const port = process.env.PORT || 3000;
 
@@ -35,6 +35,16 @@ io.on('connection',(socket)=>{
     //發送訊息至所有用戶端
     io.emit('newLocationMessage',locationMsg(loc.from,loc.text));
   });
+
+  socket.on('join',(params,callback)=>{
+    if(!isRealString(params.name)||!isRealString(params.room)){
+      callback('name and room name are required.');
+    }
+    socket.join(params.room);//加入房間
+    socket.broadcast.to(params.room).emit('newMessage',msg('admin',`${params.name} has joined.`));
+    callback();
+  });
+
 //用戶離開
   socket.on('disconnect',()=>{
     console.log('user was disconnected');

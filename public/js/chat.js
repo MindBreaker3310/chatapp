@@ -1,7 +1,16 @@
 var socket= io();
 //連線
 socket.on('connect',()=>{
-  console.log('connect to server');
+  var params=jQuery.deparam(window.location.search);
+
+  socket.emit('join',params,(err)=>{
+      if(err){
+        window.location.href='/';
+        alert(err);        
+      }else{
+        console.log('no err');
+      }
+  });
 });
 
 //伺服器關閉
