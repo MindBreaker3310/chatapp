@@ -9,7 +9,7 @@ const publicPath = path.join(__dirname, '../public');
 const port = process.env.PORT || 3000;
 
 const {Users_obj}=require('./users');
-var users=new Users_obj();
+var users_obj=new Users_obj();
 
 var app = express();
 var server=http.createServer(app);
@@ -28,7 +28,7 @@ io.on('connection',(socket)=>{
 //接收客戶端創建的訊息
   socket.on('createMessage',(message,callback)=>{
     console.log(message);
-    var user=getUser(socket.id);
+    var user=users_obj.getUser(socket.id);
     //發送訊息至所有用戶端
     io.to(user.room).emit('newMessage',msg(user.name,message.text));
     callback('serverMessage callback');
@@ -36,7 +36,7 @@ io.on('connection',(socket)=>{
 //接收位置訊息
   socket.on('createLocationMessage',(loc)=>{
     console.log(loc);
-    var user=getUser(socket.id);
+    var user=users_obj.getUser(socket.id);
     //發送訊息至所有用戶端
     io.to(user.room).emit('newLocationMessage',locationMsg(user.name,loc.text));
   });
@@ -46,9 +46,9 @@ io.on('connection',(socket)=>{
       callback('name and room name are required.');
     }
     socket.join(params.room);//加入房間
-    users.removeUser(params.id);
-    users.addUser(socket.id,params.name,params.room);
-    io.to(params.room).emit('updateUsers',users.getUserList(params.room));
+    users_obj.removeUser(params.id);
+    users_obj.addUser(socket.id,params.name,params.room);
+    io.to(params.room).emit('updateUsers',users_obj.getUserList(params.room));
     socket.broadcast.to(params.room).emit('newMessage',msg('admin',`${params.name} has joined.`));
     callback();
   });
@@ -56,9 +56,9 @@ io.on('connection',(socket)=>{
 //用戶離開
   socket.on('disconnect',()=>{
     console.log('user was disconnected');
-    var user=users.removeUser(socket.id);
+    var user=users_obj.removeUser(socket.id);
     
-    io.to(user.room).emit('updateUsers',users.getUserList(user.room));
+    io.to(user.room).emit('updateUsers',users_obj.getUserList(user.room));
     io.to(user.room).emit('newMessage',msg('admin',`${user.name} has leaved.`));      
     
   });
