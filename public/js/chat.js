@@ -1,8 +1,8 @@
 var socket= io();
-//連線
-socket.on('connect',()=>{
-  var params=jQuery.deparam(window.location.search);
 
+//連線
+socket.on('connect',()=>{  
+  var params=jQuery.deparam(window.location.search);
   socket.emit('join',params,(err)=>{
       if(err){
         window.location.href='/';
@@ -25,7 +25,6 @@ var input_box=jQuery('[name=message-input]');
 jQuery('#message-form').on('submit',(e)=>{
   e.preventDefault();//避免使用預設 改寫submit方法
   socket.emit('createMessage',{
-    from:'user',
     text:input_box.val()
   },(callback)=>{
     input_box.val('');//成功後清空輸入框
@@ -45,7 +44,6 @@ locationButton.on('click', () => {
     locationButton.removeAttr('disabled').text('location');
     console.log(position);
     socket.emit('createLocationMessage',{
-      from:'user',
       text:{lat:position.coords.latitude,lon:position.coords.longitude}
     });
     }, () => {
@@ -103,4 +101,15 @@ socket.on('newLocationMessage',(message)=>{
   // li.append(a);
   // jQuery('#messages').append(li);
   scrollToBottom()
+});
+
+//用戶列表
+socket.on('updateUsers',(user_list)=>{
+  var ul=jQuery('<ul></ul>');
+
+  user_list.forEach((element)=> {
+    ul.append(jQuery('<li></li>').text(element));
+  });
+
+  jQuery('#users').html(ul);
 });

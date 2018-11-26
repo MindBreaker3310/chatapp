@@ -1,4 +1,4 @@
-class Users{
+class Users_obj{
     constructor(){
         this.users_list=[];
     }
@@ -8,12 +8,12 @@ class Users{
         return user;
     }
     removeUser(id){
-        this.users_list=this.users_list.filter((u)=>{
-            return u.id!==id;
-        });
-    }
+        var user = this.getUser(id);        
+        this.users_list = this.users_list.filter((u) => u.id !== id);   
+        return user;
+        }
     getUser(id){
-        this.users_list=this.users_list.filter((u)=>{
+        return this.users_list.filter((u)=>{
             return u.id===id;
         })[0];//取得第一個
     }
@@ -28,4 +28,4 @@ class Users{
     }
 }
 
-module.exports={Users}
+module.exports={Users_obj}
